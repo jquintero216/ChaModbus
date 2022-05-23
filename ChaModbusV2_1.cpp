@@ -7,9 +7,9 @@
 //Ubicacion: Lima - Peru
 //Ejecución: Sistemas operativos Linux 32/64 bits 
 //Conexion Modbus: Solo para servidores Modbus TCP con arquitectura de 32 bits
-//Versión: 2
+//Versión: 2.1
 //Fecha: Mayo, 2022
-//Hora: 10:39H
+//Hora: 08:58H
 //******************************************************************************************
 #include "modbus.h" //Archivo de cabecera para apertura y cierre de puertos así como creación de FC(XY) y eFC Modbus(XY)
 #include "piepagina.h" //Archivo de cabecera para mostrar pie de pagina al final del algoritmo
@@ -140,8 +140,8 @@ int main(int argc, char **argv)
 		mb.modbus_connect(); //Conexion con el servidor
 		system("clear");
 		switch(seleccion_menu){
-			case 1:{
-				//FC-01 - Leer Bobina (0X)
+			case 1:{ //FC-01 - Leer Bobinas (0X)
+				//FC-01 - Leer Bobinas (0X)
 				bool FC01_Val[v2];
 				MenuFC01(); //Llamada a funcion Menu FC01
 				cout<<endl;
@@ -149,18 +149,21 @@ int main(int argc, char **argv)
 				cin>>FC01_Dir;
 				cout<<"2. Indique la cantidad de bobinas a leer: ";
 				cin>>FC01_Offset;
-				mb.modbus_read_coils(FC01_Dir, FC01_Offset, &FC01_Val[v2]);
-				cout<<endl;
-				cout<<"----------------------------------------"<<endl;
-				cout<<"       Resultados de la funcion 0X"<<endl;
-				cout<<"Dir"<<setw(9)<<"Estado"<<setw(9)<<endl;
-				for(int j=0;j<FC01_Offset;j++){
-					cout<<setw(2)<<(j+FC01_Dir)<<setw(7)<<FC01_Val[j]<<endl;
+				for(int l=0;l<4;l++){
+					mb.modbus_read_coils(FC01_Dir, FC01_Offset, &FC01_Val[v2]);
+					cout<<endl;
+					cout<<"----------------------------------------"<<endl;
+					cout<<"       Resultados de la funcion 0X"<<endl;
+					cout<<"Dir"<<setw(9)<<"Estado"<<setw(9)<<endl;
+					for(int j=0;j<FC01_Offset;j++){
+						cout<<setw(2)<<(j+FC01_Dir)<<setw(7)<<FC01_Val[j]<<endl;
+					}
+					cout<<"----------------------------------------"<<endl;
+					v2=0;
+					sleep(2); //Retardo para ejecución de bucle for por 2 segundos
 				}
-				cout<<"----------------------------------------"<<endl;
-				v2=0;
 			}break;
-			case 2:{
+			case 2:{ //FC-02 - Leer Bits (1X)
 				//FC-02 - Leer Bits (1X)
 				bool FC02_Val[v3];
 				MenuFC02(); //Llamada funcion Menu FC02
@@ -169,18 +172,21 @@ int main(int argc, char **argv)
 				cin>>FC02_Dir;
 				cout<<"2. Indique la cantidad de bobinas a leer: ";
 				cin>>FC02_Offset;
-				mb.modbus_read_input_bits(FC02_Dir, FC02_Offset, &FC02_Val[v3]);
-				cout<<endl;
-				cout<<"----------------------------------------"<<endl;
-				cout<<"       Resultados de la funcion 1X"<<endl;
-				cout<<"Dir"<<setw(9)<<"Estado"<<setw(9)<<endl;
-				for(int i=0;i<FC02_Offset;i++){
-					cout<<setw(2)<<(i+FC02_Dir)<<setw(7)<<FC02_Val[i]<<endl;
+				for(int a=0;a<4;a++){
+					mb.modbus_read_input_bits(FC02_Dir, FC02_Offset, &FC02_Val[v3]);
+					cout<<endl;
+					cout<<"----------------------------------------"<<endl;
+					cout<<"       Resultados de la funcion 1X"<<endl;
+					cout<<"Dir"<<setw(9)<<"Estado"<<setw(9)<<endl;
+					for(int i=0;i<FC02_Offset;i++){
+						cout<<setw(2)<<(i+FC02_Dir)<<setw(7)<<FC02_Val[i]<<endl;
+					}
+					cout<<"----------------------------------------"<<endl;
+					v3=0;
+					sleep(2); //Retardo para ejecución de bucle for por 2 segundos
 				}
-				cout<<"----------------------------------------"<<endl;
-				v3=0;
 			}break;
-			case 3:{
+			case 3:{ //FC-04 - Leer registros holding (4X)
 				//FC-04 - Leer registros holding (4X)
 				uint16_t FC04_Val[v4];
 				MenuFC04(); //Llamada funcion Menu FC04
@@ -189,18 +195,21 @@ int main(int argc, char **argv)
 				cin>>FC04_Dir;
 				cout<<"2. Indique la cantidad de registros HR a leer: ";
 				cin>>FC04_Offset;
-				mb.modbus_read_holding_registers(FC04_Dir, FC04_Offset, &FC04_Val[v4]);
-				cout<<endl;
-				cout<<"----------------------------------------"<<endl;
-				cout<<"       Resultados de la funcion 4X"<<endl;
-				cout<<"Dir"<<setw(9)<<"Valor"<<setw(9)<<endl;
-				for(int a=0;a<FC04_Offset;a++){
-					cout<<setw(2)<<(a+FC04_Dir)<<setw(9)<<FC04_Val[a]<<endl;
+				for(int r=0;r<4;r++){
+					mb.modbus_read_holding_registers(FC04_Dir, FC04_Offset, &FC04_Val[v4]);
+					cout<<endl;
+					cout<<"----------------------------------------"<<endl;
+					cout<<"       Resultados de la funcion 4X"<<endl;
+					cout<<"Dir"<<setw(9)<<"Valor"<<setw(9)<<endl;
+					for(int a=0;a<FC04_Offset;a++){
+						cout<<setw(2)<<(a+FC04_Dir)<<setw(9)<<FC04_Val[a]<<endl;
+					}
+					cout<<"----------------------------------------"<<endl;
+					v4=0;
+					sleep(2); //Retardo para ejecución de bucle for por 2 segundos
 				}
-				cout<<"----------------------------------------"<<endl;
-				v4=0;
 			}break;
-			case 4:{
+			case 4:{ //FC-03 - Leer registros de entrada (3X)
 				//FC-03 - Leer registros de entrada (3X)
 				uint16_t FC03_Val[v5];
 				MenuFC03(); //Llamada funcion Menu FC03
@@ -209,18 +218,21 @@ int main(int argc, char **argv)
 				cin>>FC03_Dir;
 				cout<<"2. Indique la cantidad de registros HR a leer: ";
 				cin>>FC03_Offset;
-				mb.modbus_read_input_registers(FC03_Dir, FC03_Offset, &FC03_Val[v5]);
-				cout<<endl;
-				cout<<"----------------------------------------"<<endl;
-				cout<<"       Resultados de la funcion 3X"<<endl;
-				cout<<"Dir"<<setw(9)<<"Valor"<<setw(9)<<endl;
-				for(int b=0;b<FC03_Offset;b++){
-					cout<<setw(2)<<(b+FC03_Dir)<<setw(9)<<FC03_Val[b]<<endl;
+				for(int h=0;h<4;h++){
+					mb.modbus_read_input_registers(FC03_Dir, FC03_Offset, &FC03_Val[v5]);
+					cout<<endl;
+					cout<<"----------------------------------------"<<endl;
+					cout<<"       Resultados de la funcion 3X"<<endl;
+					cout<<"Dir"<<setw(9)<<"Valor"<<setw(9)<<endl;
+					for(int b=0;b<FC03_Offset;b++){
+						cout<<setw(2)<<(b+FC03_Dir)<<setw(9)<<FC03_Val[b]<<endl;
+					}
+					cout<<"----------------------------------------"<<endl;
+					v5=0;
+					sleep(2); //Retardo para ejecución de bucle for por 2 segundos
 				}
-				cout<<"----------------------------------------"<<endl;
-				v5=0;
 			}break;
-			case 5:{
+			case 5:{ //FC-05 - Escribir Bobina (0X)
 				//FC-05 - Escribir Bobina (0X)                	
 				bool FC05_Val;
 				MenuFC05(); //Llamada funcion Menu FC05
@@ -231,7 +243,7 @@ int main(int argc, char **argv)
 				cin>>FC05_Val;
 				mb.modbus_write_coil(FC05_Dir, FC05_Val);
 			}break;
-			case 6:{
+			case 6:{ //FC-06 - Escribir Registro (4X)
 				//FC-06 - Escribir Registro (4X)
 				uint16_t FC06_Val;
 				MenuFC06(); //Llamada funcion Menu FC06
@@ -242,7 +254,7 @@ int main(int argc, char **argv)
 				cin>>FC06_Val;
 				mb.modbus_write_register(FC06_Dir, FC06_Val);
 			}break;
-			case 7:{
+			case 7:{ //FC-0F - Escribir Multiples Bobinas (0X)
 				//FC-0F - Escribir Multiples Bobinas (0X)
 				bool FC0F_Val[v6]; // Arreglo para escribir datos FC
 				bool FC0F_Est; // Valor de las direcciones a escribir en arreglo
@@ -258,7 +270,7 @@ int main(int argc, char **argv)
 				}
 				mb.modbus_write_coils(FC0F_Dir, FC0F_Offset, FC0F_Val);
 			}break;
-			case 8:{
+			case 8:{ //FC-10 - Escribir Multiples Registros (4X)
 				//FC-10 - Escribir Multiples Registros (4X)
 				uint16_t FC10_Val[v7];
 				uint16_t FC10_Est;
