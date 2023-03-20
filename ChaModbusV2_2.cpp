@@ -43,6 +43,7 @@ uint16_t FC02_Offset=0,FC02_Dir=0;
 uint8_t *msg_fc01;
 int UnitID=1,v1=0,v2=0,v3=0,v4=0,v5=0,v6=0,v7=0,seleccion_menu=0,eb=0,er=0,fc01=0x01;
 string continuar,dirIP;
+bool badUid=false;
 //******************************************************************************************
 void MenuPrincipal(){
 	cout<<"!------------------------------------------------------------------------!"<<endl;
@@ -137,7 +138,17 @@ int main(int argc, char **argv)
 	cout<<"0. Digite direccion IP del servidor destino: ";
 	cin>>dirIP;
 	cout<<"1. Digite ID del servidor destino: ";
-	cin>>UnitID;
+	do{
+		cin>>UnitID;
+		if (UnitID <= 0 or UnitID > 255){
+			badUid=true;
+			cout<<endl;
+			cout<<"El ID debe estar en un rango entre 1 y 255"<<endl;
+			cout<<"1. Digite ID del servidor destino: ";
+		}
+		else 
+			badUid=false;
+	}while (badUid==true);
 	cout<<endl;
 	system("clear");
     do{
