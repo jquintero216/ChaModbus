@@ -7,9 +7,9 @@
 //Ubicacion: Guatire - Venezuela
 //Ejecución: Sistemas operativos Linux 32/64 bits 
 //Conexion Modbus: Solo para servidores Modbus TCP con arquitectura de 32 bits
-//Versión: 2.2
-//Fecha: Octubre, 2022
-//Hora: 17:13H
+//Versión: 2.3.05
+//Fecha: Abril, 2023
+//Hora: 13:55H
 //******************************************************************************************
 #include "modbus.h" //Archivo de cabecera para apertura y cierre de puertos así como creación de FC(XY) y eFC Modbus(XY)
 #include "piepagina.h" //Archivo de cabecera para mostrar pie de pagina al final del algoritmo
@@ -45,6 +45,11 @@ int UnitID=1,v1=0,v2=0,v3=0,v4=0,v5=0,v6=0,v7=0,seleccion_menu=0,eb=0,er=0,fc01=
 string continuar,dirIP;
 bool badUid=false;
 //******************************************************************************************
+void ContinuarMinusculas(string &seguir){
+	for (int aux=0;aux<seguir.length();aux++){
+		seguir[aux]=tolower(seguir[aux]);
+	}
+}
 void MenuPrincipal(){
 	cout<<"!------------------------------------------------------------------------!"<<endl;
 	cout<<"!***********                Menú principal                    ***********!"<<endl; 
@@ -146,9 +151,10 @@ int main(int argc, char **argv)
 			cout<<"El ID debe estar en un rango entre 1 y 255"<<endl;
 			cout<<"1. Digite ID del servidor destino: ";
 		}
-		else 
+		else{
 			badUid=false;
-	}while (badUid==true);
+        }
+    }while (badUid==true);
 	cout<<endl;
 	system("clear");
     do{
@@ -369,17 +375,18 @@ int main(int argc, char **argv)
 		}
 		mb.modbus_close(); //Se cierra la conexion al servidor y se limpia la memoria almacenada en buffer de datos
 		cout<<endl;
-		do{ //Este do-while se ejecuta en caso el usuario presione otra tecla distinta a S o N mayuscula o minuscula para continuar o salir del programa
-			cout<<"Desea efectuar otra consulta Modbus (S/N): ";
+		do{ //Este do-while se ejecuta en caso el usuario presione otra tecla distinta a s o n minuscula para continuar o salir del programa
+			cout<<"Desea efectuar otra consulta Modbus (s/n): ";
 			cin>>continuar;
-			if (continuar=="S" or continuar=="s"){
+			ContinuarMinusculas(continuar);
+			if (continuar=="s"){
 				eb=1; // Variable auxiliar para la ejecución de la instrucción continuar en 1
 			}
-			else if(continuar=="N" or continuar=="n"){
+			else if(continuar=="n"){
 				eb=2; // Variable auxiliar para la ejecución de la instrucción salir en 2
 			}
-			else if (continuar!="N" or continuar!="n" or continuar!="S" or continuar!="s"){
-				cout<<"Debe digitar N/n para salir o S/s para continuar"<<endl;
+			else if (continuar!="n" or continuar!="s"){
+				cout<<"Debe digitar (n) para salir o (s) para continuar"<<endl;
 				cout<<endl;
 				eb=3; // Variable auxiliar para la ejecución de la instrucción indeterminado en 3
 			}
