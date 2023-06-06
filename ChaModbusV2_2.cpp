@@ -25,7 +25,7 @@
 #define Escribir_bobina 5
 #define Escribir_registro_HR 6
 #define Escribir_bobinas 7
-#define Escribir_registros_HR 8 
+#define Escribir_registros_HR 8
 //******************************************************************************************
 using std::cout; //Uso de las funciones del iostream para imprimir datos en consola
 using std::cin; //Uso de las funciones del iostream para recibir datos desde consola
@@ -44,6 +44,7 @@ uint8_t *msg_fc01;
 int UnitID=1,v1=0,v2=0,v3=0,v4=0,v5=0,v6=0,v7=0,seleccion_menu=0,eb=0,er=0,fc01=0x01;
 string continuar,dirIP;
 bool badUid=false;
+modbus servidor=modbus(dirIP,502);
 //******************************************************************************************
 void ContinuarMinusculas(string &seguir){
 	for (int aux=0;aux<seguir.length();aux++){
@@ -143,9 +144,9 @@ int main(int argc, char **argv)
 	cout<<"0. Digite direccion IP del servidor destino: ";
 	cin>>dirIP;
 	cout<<"1. Digite ID del servidor destino: ";
-	do{
+	do{ //Este bloque de instruccion se ejecuta si y solo si la ID de la unidad esta fuera de rango
 		cin>>UnitID;
-		if (UnitID <= 0 or UnitID > 255){
+		if(UnitID <= 0 or UnitID > 255){
 			badUid=true;
 			cout<<endl;
 			cout<<"El ID debe estar en un rango entre 1 y 255"<<endl;
@@ -154,22 +155,32 @@ int main(int argc, char **argv)
 		else{
 			badUid=false;
         }
-    }while (badUid==true);
+    }while(badUid==true);
 	cout<<endl;
 	system("clear");
     do{
 		eb=0; //Se coloca esta variable entera en 0 para normalizar ultimo bucle do-while
 		system("clear"); //Esta instruccion se ejecuta si se repite el bluce do-while
-		MenuPrincipal(); //Llamada a funcion Menu Principal
-		cout<<endl;
-		cout<<"Por favor digite la funcion Modbus-TCP/IP a ejecutar: ";
-		cin>>seleccion_menu; 
-		modbus mb = modbus(dirIP, 502); //Creacion de objeto Modbus TCP
-		mb.modbus_set_slave_id(UnitID); //Asignacion ID 
-		mb.modbus_connect(); //Conexion con el servidor
-		system("clear");
-		switch(seleccion_menu){
-			case Leer_bobinas:{ //FC-01 - Leer bobinas (0X)
+		servidor=modbus(dirIP, 502); //Asignacion de IP y puerto al objeto modbus por medio del metodo de la clase modbus
+		if(servidor.modbus_connect()==false){
+        	cout<<endl;
+			cout<<"------------------------Advertencia-----------------------"<<endl;
+			cout<<"Conexión fallida con servidor Modbus TCP/IP"<<endl;
+            cout<<"Verifique los siguientes puntos antes de reintentar:"<<endl;
+			cout<<"1. El equipo se encuentra encendido"<<endl; 
+			cout<<"2. El equipo esta conectado a la red e intente nuevamente"<<endl;
+			cout<<"3. La dirección IP del equipo esta en su mismo rango"<<endl;
+			cout<<"------------------------Advertencia-----------------------"<<endl;
+		}
+		else{
+			MenuPrincipal(); //Llamada a funcion Menu Principal
+			cout<<endl;
+			cout<<"Por favor digite la funcion Modbus-TCP/IP a ejecutar: ";
+			cin>>seleccion_menu; 
+			servidor.modbus_set_slave_id(UnitID); //Asignacion ID
+			system("clear");
+			switch(seleccion_menu){
+				case Leer_bobinas:{ //FC-01 - Leer bobinas (0X)
 				//FC-01 - Leer Bobinas (0X)
 				bool FC01_Val[v2];
 				MenuFC01(); //Llamada a funcion Menu FC01
@@ -178,10 +189,10 @@ int main(int argc, char **argv)
 				cin>>FC01_Dir;
 				cout<<"2. Indique la cantidad de bobinas a leer: ";
 				cin>>FC01_Offset;
-				mb.modbus_read_coils(FC01_Dir, FC01_Offset, &FC01_Val[v2]);
-				if (mb.err){
+				servidor.modbus_read_coils(FC01_Dir, FC01_Offset, &FC01_Val[v2]);
+				if (servidor.err){
 					cout<<endl;
-					cout<<"Codigo de error: "<<mb.error_msg<<endl;
+					cout<<"Codigo de error: "<<servidor.error_msg<<endl;
 				}
 				else{
 					for(int l=0;l<4;l++){
@@ -197,8 +208,8 @@ int main(int argc, char **argv)
 						sleep(2); //Retardo para ejecución de bucle for por 2 segundos
 					}
 				}	
-			}break;
-			case Leer_bits:{ //FC-02 - Leer bits (1X)
+				}break;
+				case Leer_bits:{ //FC-02 - Leer bits (1X)
 				//FC-02 - Leer Bits (1X)
 				bool FC02_Val[v3];
 				MenuFC02(); //Llamada funcion Menu FC02
@@ -207,10 +218,10 @@ int main(int argc, char **argv)
 				cin>>FC02_Dir;
 				cout<<"2. Indique la cantidad de bobinas a leer: ";
 				cin>>FC02_Offset;
-				mb.modbus_read_input_bits(FC02_Dir, FC02_Offset, &FC02_Val[v3]);
-				if(mb.err){
+				servidor.modbus_read_input_bits(FC02_Dir, FC02_Offset, &FC02_Val[v3]);
+				if(servidor.err){
 					cout<<endl;
-					cout<<"Codigo de error: "<<mb.error_msg<<endl;			
+					cout<<"Codigo de error: "<<servidor.error_msg<<endl;			
 				}
 				else {
 					for(int a=0;a<4;a++){
@@ -226,8 +237,8 @@ int main(int argc, char **argv)
 					sleep(2); //Retardo para ejecución de bucle for por 2 segundos
 					}
 				}	
-			}break;
-			case Leer_registros_HR:{ //FC-04 - Leer registros holding (4X)
+				}break;
+				case Leer_registros_HR:{ //FC-04 - Leer registros holding (4X)
 				//FC-04 - Leer registros holding (4X)
 				uint16_t FC04_Val[v4];
 				MenuFC04(); //Llamada funcion Menu FC04
@@ -236,14 +247,14 @@ int main(int argc, char **argv)
 				cin>>FC04_Dir;
 				cout<<"2. Indique la cantidad de registros HR a leer: ";
 				cin>>FC04_Offset;
-				mb.modbus_read_holding_registers(FC04_Dir, FC04_Offset, &FC04_Val[v4]);
-				if (mb.err){
+				servidor.modbus_read_holding_registers(FC04_Dir, FC04_Offset, &FC04_Val[v4]);
+				if (servidor.err){
 					cout<<endl;
-					cout<<"Codigo de error: "<<mb.error_msg<<endl;
+					cout<<"Codigo de error: "<<servidor.error_msg<<endl;
 				}
 				else{ 
 					for(int r=0;r<4;r++){
-					//mb.modbus_read_holding_registers(FC04_Dir, FC04_Offset, &FC04_Val[v4]);
+					//servidor.modbus_read_holding_registers(FC04_Dir, FC04_Offset, &FC04_Val[v4]);
 					cout<<endl;
 					cout<<"----------------------------------------"<<endl;
 					cout<<"       Resultados de la funcion 4X"<<endl;
@@ -256,8 +267,8 @@ int main(int argc, char **argv)
 					sleep(2); //Retardo para ejecución de bucle for por 2 segundos
 					}
 				}	
-			}break;
-			case Leer_registros_IR:{ //FC-03 - Leer registros de entrada (3X)
+				}break;
+				case Leer_registros_IR:{ //FC-03 - Leer registros de entrada (3X)
 				//FC-03 - Leer registros de entrada (3X)
 				uint16_t FC03_Val[v5];
 				MenuFC03(); //Llamada funcion Menu FC03
@@ -266,14 +277,14 @@ int main(int argc, char **argv)
 				cin>>FC03_Dir;
 				cout<<"2. Indique la cantidad de registros HR a leer: ";
 				cin>>FC03_Offset;
-				mb.modbus_read_input_registers(FC03_Dir, FC03_Offset, &FC03_Val[v5]);
-				if(mb.err){
+				servidor.modbus_read_input_registers(FC03_Dir, FC03_Offset, &FC03_Val[v5]);
+				if(servidor.err){
 					cout<<endl;
-					cout<<"Codigo de error: "<<mb.error_msg<<endl;
+					cout<<"Codigo de error: "<<servidor.error_msg<<endl;
 				}
 				else {
 					for(int h=0;h<4;h++){
-						//mb.modbus_read_input_registers(FC03_Dir, FC03_Offset, &FC03_Val[v5]);
+						//servidor.modbus_read_input_registers(FC03_Dir, FC03_Offset, &FC03_Val[v5]);
 						cout<<endl;
 						cout<<"----------------------------------------"<<endl;
 						cout<<"       Resultados de la funcion 3X"<<endl;
@@ -286,8 +297,8 @@ int main(int argc, char **argv)
 						sleep(2); //Retardo para ejecución de bucle for por 2 segundos
 					}
 				}	
-			}break;
-			case Escribir_bobina:{ //FC-05 - Escribir bobina (0X)
+				}break;
+				case Escribir_bobina:{ //FC-05 - Escribir bobina (0X)
 				//FC-05 - Escribir Bobina (0X)                	
 				bool FC05_Val;
 				MenuFC05(); //Llamada funcion Menu FC05
@@ -296,15 +307,15 @@ int main(int argc, char **argv)
 				cin>>FC05_Dir;
 				cout<<"2. Indicar accion (1:True / 0:False): ";
 				cin>>FC05_Val;
-				if(mb.err){
+				if(servidor.err){
 					cout<<endl;
-					cout<<"Codigo de error: "<<mb.error_msg<<endl;
+					cout<<"Codigo de error: "<<servidor.error_msg<<endl;
 				}
 				else{
-					mb.modbus_write_coil(FC05_Dir, FC05_Val);
+					servidor.modbus_write_coil(FC05_Dir, FC05_Val);
 				}
-			}break;
-			case Escribir_registro_HR:{ //FC-06 - Escribir registro holding (4X)
+				}break;
+				case Escribir_registro_HR:{ //FC-06 - Escribir registro holding (4X)
 				//FC-06 - Escribir Registro (4X)
 				uint16_t FC06_Val;
 				MenuFC06(); //Llamada funcion Menu FC06
@@ -313,15 +324,15 @@ int main(int argc, char **argv)
 				cin>>FC06_Dir;
 				cout<<"2. Indicar valor registro: ";
 				cin>>FC06_Val;
-				if(mb.err){
+				if(servidor.err){
 					cout<<endl;
-					cout<<"Codigo de error: "<<mb.error_msg<<endl;
+					cout<<"Codigo de error: "<<servidor.error_msg<<endl;
 				}
 				else {
-				mb.modbus_write_register(FC06_Dir, FC06_Val);
+				servidor.modbus_write_register(FC06_Dir, FC06_Val);
 				}
-			}break;
-			case Escribir_bobinas:{ //FC-0F - Escribir multiples bobinas (0X)
+				}break;
+				case Escribir_bobinas:{ //FC-0F - Escribir multiples bobinas (0X)
 				//FC-0F - Escoribir Multiples Bobinas (0X)
 				bool FC0F_Val[v6]; // Arreglo para escribir datos FC
 				bool FC0F_Est; // Valor de las direcciones a escribir en arreglo
@@ -334,23 +345,23 @@ int main(int argc, char **argv)
 					cout<<"3. Ingrese el "<<z+1<<" valor de la bobina (1:True/0:False): ";
 					cin>>FC0F_Est;
 					FC0F_Val[z]=FC0F_Est;
-					if(mb.err){
+					if(servidor.err){
 						cout<<endl;
-						cout<<"Codigo de error: "<<mb.error_msg<<endl;
+						cout<<"Codigo de error: "<<servidor.error_msg<<endl;
 					}
 					else{
-						mb.modbus_write_coils(FC0F_Dir, FC0F_Offset, FC0F_Val);
+						servidor.modbus_write_coils(FC0F_Dir, FC0F_Offset, FC0F_Val);
 					}
 				}
-				/*if(mb.err){
+				/*if(servidor.err){
 					cout<<endl;
-					cout<<"Codigo de error: "<<mb.error_msg<<endl;
+					cout<<"Codigo de error: "<<servidor.error_msg<<endl;
 				}
 				else{	
-					mb.modbus_write_coils(FC0F_Dir, FC0F_Offset, FC0F_Val);
+					servidor.modbus_write_coils(FC0F_Dir, FC0F_Offset, FC0F_Val);
 				}*/
-			}break;
-			case Escribir_registros_HR:{ //FC-10 - Escribir multiples registros holding (4X)
+				}break;
+				case Escribir_registros_HR:{ //FC-10 - Escribir multiples registros holding (4X)
 				//FC-10 - Escribir Multiples Registros (4X)
 				uint16_t FC10_Val[v7];
 				uint16_t FC10_Est;
@@ -363,20 +374,21 @@ int main(int argc, char **argv)
 					cout<<"3. Ingrese el "<<w+1<<" valor del registro HR: ";
 					cin>>FC10_Est;
 					FC10_Val[w]=FC10_Est;
-					if(mb.err){
+					if(servidor.err){
 						cout<<endl;
-						cout<<"Codigo de error: "<<mb.error_msg<<endl;	
+						cout<<"Codigo de error: "<<servidor.error_msg<<endl;	
 					}
 					else{
-						mb.modbus_write_registers(FC10_Dir, FC10_Offset, FC10_Val);	
+						servidor.modbus_write_registers(FC10_Dir, FC10_Offset, FC10_Val);	
 					}
 				}
-			}break;
+				}break;
+			}
 		}
-		mb.modbus_close(); //Se cierra la conexion al servidor y se limpia la memoria almacenada en buffer de datos
+		servidor.modbus_close(); //Se cierra la conexion al servidor y se limpia la memoria almacenada en buffer de datos
 		cout<<endl;
 		do{ //Este do-while se ejecuta en caso el usuario presione otra tecla distinta a s o n minuscula para continuar o salir del programa
-			cout<<"Desea efectuar otra consulta Modbus (s/n): ";
+			cout<<"Desea continuar escanenado la red Modbus (s/n): ";
 			cin>>continuar;
 			ContinuarMinusculas(continuar);
 			if (continuar=="s"){
@@ -392,7 +404,6 @@ int main(int argc, char **argv)
 			}
 		}while(eb==3); // si el valor del auxiliar es indeterminado se solicita nuevamente las opciones permitidas
 	}while(eb==1);
-	//}while(continuar.compare("S")==0 or continuar.compare("s")==0); //Si el usuario presionó "S" o "s", el bucle do-while se vuelve a ejecutar.
     system("clear");
     piepagina J216_pieDpagina; //Creacion del objeto pie de pagina
 	J216_pieDpagina.mostrar(); //Se llama a la propiedad mostrar del objeto
