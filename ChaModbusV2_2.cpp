@@ -132,6 +132,16 @@ void MenuFC10(){
 	cout<<"!***********      3. Valores a escribir en cada registro      ***********!"<<endl;
 	cout<<"!------------------------------------------------------------------------!"<<endl;
 }		
+void ErrorConexion(){
+	cout<<endl;
+		cout<<"------------------------Advertencia-----------------------"<<endl;
+		cout<<"Conexión fallida con servidor Modbus TCP/IP"<<endl;
+        cout<<"Verifique los siguientes puntos antes de reintentar:"<<endl;
+		cout<<"1. El equipo se encuentra encendido"<<endl; 
+		cout<<"2. El equipo esta conectado a la red e intente nuevamente"<<endl;
+		cout<<"3. La dirección IP del equipo esta en su mismo rango"<<endl;
+		cout<<"------------------------Advertencia-----------------------"<<endl;	
+}
 //******************************************************************************************
 int main(int argc, char **argv)
 {
@@ -163,14 +173,7 @@ int main(int argc, char **argv)
 		system("clear"); //Esta instruccion se ejecuta si se repite el bluce do-while
 		servidor=modbus(dirIP, 502); //Asignacion de IP y puerto al objeto modbus por medio del metodo de la clase modbus
 		if(servidor.modbus_connect()==false){
-        	cout<<endl;
-			cout<<"------------------------Advertencia-----------------------"<<endl;
-			cout<<"Conexión fallida con servidor Modbus TCP/IP"<<endl;
-            cout<<"Verifique los siguientes puntos antes de reintentar:"<<endl;
-			cout<<"1. El equipo se encuentra encendido"<<endl; 
-			cout<<"2. El equipo esta conectado a la red e intente nuevamente"<<endl;
-			cout<<"3. La dirección IP del equipo esta en su mismo rango"<<endl;
-			cout<<"------------------------Advertencia-----------------------"<<endl;
+        	ErrorConexion(); //Llama a error de conexion para mostrar advertencia a usuario
 		}
 		else{
 			MenuPrincipal(); //Llamada a funcion Menu Principal
